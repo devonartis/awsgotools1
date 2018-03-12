@@ -16,7 +16,8 @@ func main() {
 	// Allows you to define the profile if not profile is given the default profile will be used
 
 	profile := flag.String("p", "", "Default profile will be used")
-	region := flag.String("r", "us-east-2", "Region defaults to us-east-2")
+	region := flag.String("r", "us-east-1", "Region defaults to us-east-2")
+	imageid := flag.String("i", "ami-97785bed", "Image ID to launch")
 
 	flag.Parse()
 
@@ -32,7 +33,7 @@ func main() {
 
 	launchResult, err := svc.RunInstances(&ec2.RunInstancesInput{
 
-		ImageId:      aws.String("ami-e7527ed7"),
+		ImageId:      aws.String(*imageid),
 		InstanceType: aws.String("t2.micro"),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
