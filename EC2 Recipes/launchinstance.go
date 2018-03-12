@@ -15,9 +15,12 @@ func main() {
 
 	// Allows you to define the profile if not profile is given the default profile will be used
 
-	profile := flag.String("p", "", "Default profile will be used")
-	region := flag.String("r", "us-east-1", "Region defaults to us-east-2")
-	imageid := flag.String("i", "ami-97785bed", "Image ID to launch")
+	//var ip address
+
+	profile := flag.String("profile", "", "Default profile will be used")
+	region := flag.String("region", "us-east-1", "Region defaults to us-east-2")
+	imageid := flag.String("image", "ami-97785bed", "Image ID to launch")
+	instanceType := flag.String("instance", "t2.micro", "Instance type to launch")
 
 	flag.Parse()
 
@@ -34,7 +37,7 @@ func main() {
 	launchResult, err := svc.RunInstances(&ec2.RunInstancesInput{
 
 		ImageId:      aws.String(*imageid),
-		InstanceType: aws.String("t2.micro"),
+		InstanceType: aws.String(*instanceType),
 		MinCount:     aws.Int64(1),
 		MaxCount:     aws.Int64(1),
 	})
@@ -45,5 +48,24 @@ func main() {
 	}
 
 	log.Println("Created instance", *launchResult.Instances[0].InstanceId)
+
+	// Add tags to the created instance
+	_, errtag := svc.CreateTags(&ec2.CreateTagsInput{
+		Resources: []*string{launchResult.Instances[0].InstanceId},
+		Tags: []*ec2.Tag{
+			{
+				Key:   aws.String("Name"),
+				Value: aws.String("MyFirstInstance"),
+			},
+		},
+	})
+	if errtag != nil {
+		log.Println("Could not create tags for instance", launchResult.Instances[0].InstanceId, errtag)
+		return
+	}
+
+	log.Println("Successfully tagged instance")
+
+	// Print out ip address
 
 }
