@@ -25,6 +25,10 @@ func main() {
 	imageid := flag.String("image", "ami-97785bed", "Image ID to launch")
 	instanceType := flag.String("instance", "t2.micro", "Instance type to launch")
 
+	/*
+		TO DO: Add Flag and pointers for MinCount and MaxCount
+	*/
+
 	flag.Parse()
 
 	// Create a new AWS Session with Options based on if a profile was given
@@ -46,7 +50,7 @@ func main() {
 	})
 
 	if err != nil {
-		log.Println("Could not create instance", err)
+		log.Println("Instance could not be created", err)
 		return
 	}
 
@@ -67,10 +71,6 @@ func main() {
 		return
 	}
 
-	log.Println("Successfully tagged instance")
-
-	// Here we create an input that will filter any instances that aren't either
-	// of these two states. This is generally what we want
 	params := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
@@ -121,5 +121,5 @@ func main() {
 		}
 
 	}
-	//log.Print(resp)
+
 }
