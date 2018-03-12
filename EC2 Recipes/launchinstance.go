@@ -4,7 +4,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/url"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -60,12 +63,63 @@ func main() {
 		},
 	})
 	if errtag != nil {
-		log.Println("Could not create tags for instance", launchResult.Instances[0].InstanceId, errtag)
+		log.Println("Could not create tags for instance", *launchResult.Instances[0].InstanceId, errtag)
 		return
 	}
 
 	log.Println("Successfully tagged instance")
 
-	// Print out ip address
+	// Here we create an input that will filter any instances that aren't either
+	// of these two states. This is generally what we want
+	params := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			&ec2.Filter{
+				Name: aws.String("instance-state-name"),
+				Values: []*string{
+					aws.String("running"),
+					aws.String("pending"),
+				},
+			},
+		},
+	}
 
+	resp, _ := svc.DescribeInstances(params)
+
+	for idx, _ := range resp.Reservations {
+
+		for _, inst := range resp.Reservations[idx].Instances {
+
+			name := "None"
+
+			for _, keys := range inst.Tags {
+				if *keys.Key == "Name" {
+					name = url.QueryEscape(*keys.Value)
+				}
+			}
+
+			important_vals := []*string{
+				inst.InstanceId,
+				&name,
+				inst.PrivateIpAddress,
+				inst.InstanceType,
+				inst.PublicIpAddress,
+			}
+
+			// Convert any nil value to a printable string in case it doesn't
+			// doesn't exist, which is the case with certain values
+			output_vals := []string{}
+			for _, val := range important_vals {
+				if val != nil {
+					output_vals = append(output_vals, *val)
+				} else {
+					output_vals = append(output_vals, "None")
+				}
+			}
+			// The values that we care about, in the order we want to print them
+
+			fmt.Println(strings.Join(output_vals, " "))
+		}
+
+	}
+	//log.Print(resp)
 }
