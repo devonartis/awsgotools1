@@ -38,7 +38,7 @@ func main() {
 	fmt.Println("Buckets:")
 
 	for _, b := range result.Buckets {
-		fmt.Printf("* %s created on %s\n",
+		Printf("* %s created on %s\n",
 			aws.StringValue(b.Name), aws.TimeValue(b.CreationDate))
 	}
 
