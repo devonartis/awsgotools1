@@ -3,12 +3,13 @@ package main
 //Create an Amazon EC2 instance with tags and log into the instance
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/url"
 	"runtime"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws/credentials"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -30,18 +31,8 @@ func main() {
 
 	//var ip address
 	log.Printf(info, "Launch Instance: ", runtime.Version())
-	
-	profile := flag.String("profile", "", "Default profile will be used")
-	region := flag.String("region", "us-east-1", "Region defaults to us-east-2")
-	imageid := flag.String("image", "ami-97785bed", "Image ID to launch")
-	instanceType := flag.String("instance", "t2.micro", "Instance type to launch")
 
-	/*
-		TO DO: Add Flag and pointers for MinCount and MaxCount
-	*/
-
-	flag.Parse()
-
+	cred := credentials.NewSharedCredentials("credentials", "rai")
 	// Create a new AWS Session with Options based on if a profile was given
 
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
